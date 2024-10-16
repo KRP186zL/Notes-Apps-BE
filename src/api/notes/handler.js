@@ -1,3 +1,5 @@
+const ClientError = require('../../exceptions/ClientError');
+
 class NotesHandler{
   #service;
   #validator;
@@ -32,11 +34,22 @@ class NotesHandler{
       return response;
     }
     catch (err) {
+      if (err instanceof ClientError){
+        const response = h.response({
+          status: 'fail',
+          message:err.message,
+        });
+        response.code(err.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
       const response = h.response({
-        status: 'fail',
-        message: err.message
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.'
       });
-      response.code(400);
+      response.code(500);
+      console.error(err);
 
       return response;
     }
@@ -67,11 +80,23 @@ class NotesHandler{
       };
     }
     catch (err) {
+      if (err instanceof ClientError){
+        const response = h.response({
+          status:'fail',
+          message:err.message
+        });
+        response.code(err.statusCode);
+
+        return response;
+      }
+
+      // Server ERROR!
       const response = h.response({
-        status: 'fail',
-        message: err.message
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.'
       });
-      response.code(404);
+      response.code(500);
+      console.error(err);
 
       return response;
     }
@@ -90,11 +115,23 @@ class NotesHandler{
       };
     }
     catch (err) {
+      if (err instanceof ClientError){
+        const response = h.response({
+          status:'fail',
+          message: err.message,
+        });
+        response.code(err.statusCode);
+
+        return response;
+      }
+
+      // Server ERROR!
       const response = h.response({
-        status: 'fail',
-        message: err.message
+        status: 'error',
+        message: 'Maaf terjadi kegagalan pada server kami.'
       });
-      response.code(404);
+      response.code(500);
+      console.error(err);
 
       return response;
     }
@@ -111,11 +148,23 @@ class NotesHandler{
       };
     }
     catch (err){
+      if (err instanceof ClientError){
+        const response = h.response({
+          status:'fail',
+          message:err.message
+        });
+        response.code(err.statusCode);
+
+        return response;
+      }
+
+      // Server ERROR!
       const response = h.response({
-        status: 'fail',
-        message: err.message
+        status:'error',
+        message: 'Maaf terjadi kegagalan di server kami.'
       });
-      response.code(404);
+      response.code(500);
+      console.error(err);
 
       return response;
     }
