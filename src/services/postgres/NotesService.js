@@ -1,15 +1,15 @@
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
-const InvariantError = require('../../exceptions/InvariantError');
+const InvariantError = require('../../error/InvariantError');
 const { mapDBToModel } = require('../../utils');
-const NotFoundError = require('../../exceptions/NotFoundError');
+const NotFoundError = require('../../error/NotFoundError');
 
 class NotesService {
-  constructor(){
+  constructor() {
     this._pool = new Pool();
   }
 
-  async addNote({ title, body, tags }){
+  async addNote({ title, body, tags }) {
     const id = nanoid(16);
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
@@ -21,56 +21,56 @@ class NotesService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows[0].id){
+    if (!result.rows[0].id) {
       throw new InvariantError('Catatan gagal ditambahkan');
     }
 
     return result.rows[0].id;
   }
 
-  async getNotes(){
+  async getNotes() {
     const result = await this._pool.query('SELECT * FROM notes');
 
     return result.rows.map(mapDBToModel);
   }
 
-  async getNoteById(id){
+  async getNoteById(id) {
     const query = {
       text: 'SELECT * FROM notes WHERE id = $1',
-      values : [id],
+      values: [id],
     };
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length){
+    if (!result.rows.length) {
       throw new NotFoundError('Catatan tidak ditemukan');
     }
 
     return result.rows.map(mapDBToModel)[0];
   }
-  async putNoteById(id, { title, body, tags }){
+  async putNoteById(id, { title, body, tags }) {
     const updatedAt = new Date().toISOString();
     const query = {
       text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING *',
-      values : [title, body, tags, updatedAt, id],
+      values: [title, body, tags, updatedAt, id],
     };
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length){
+    if (!result.rows.length) {
       throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan');
     }
 
     return result.rows.map(mapDBToModel);
   }
-  async deleteNoteById(id){
+  async deleteNoteById(id) {
     const query = {
       text: 'DELETE FROM notes WHERE id = $1 RETURNING *',
       values: [id],
     };
 
     const result = await this._pool.query(query);
-    if (!result.rows.length){
+    if (!result.rows.length) {
       throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan');
     }
   }

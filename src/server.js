@@ -1,7 +1,9 @@
 require('dotenv').config();
 
+const ClientError = require('./error/ClientError');
+
 const Hapi = require('@hapi/hapi');
-const ClientError = require('./exceptions/ClientError');
+const Jwt = require('@hapi/jwt');
 
 // Notes Plugin
 const notes = require('./api/notes');
@@ -11,62 +13,97 @@ const NotesValidator = require('./validator/notes');
 // Users Plugin
 const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
-const UsersValidator = require('./validator/users/index');
+const UsersValidator = require('./validator/users');
+
+// Authentification Plugin
+const authentications = require('./api/authentications');
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsValidator = require('./validator/authentications');
+const TokenManager = require('./token/TokenManager');
 
 (async () => {
-
   const notesService = new NotesService();
   const usersService = new UsersService();
+  const authenticationsService = new AuthenticationsService();
 
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
     routes: {
-      cors: true
-    }
+      cors: true,
+    },
   });
 
-  try {
-    await server.register([
-      {
-        plugin: notes,
-        options : {
-          service: notesService,
-          validator : NotesValidator,
-        }
+  // Registrasi plugin external
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  // Mendefinisikan strategy autentikasi jwt
+  server.auth.strategy('notesapp_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
       },
-      {
-        plugin: users,
-        options:{
-          service: usersService,
-          validator: UsersValidator
-        }
-      }
-    ]);
+    }),
+  });
 
-    server.ext('onPreResponse', (request, h) => {
-      // mendapatkan konteks response dari request
-      const { response } = request;
+  // Registrasi plugin internal
+  await server.register([
+    {
+      plugin: notes,
+      options: {
+        service: notesService,
+        validator: NotesValidator,
+      },
+    },
+    {
+      plugin: users,
+      options: {
+        service: usersService,
+        validator: UsersValidator,
+      },
+    },
+    {
+      plugin: authentications,
+      options: {
+        authenticationsService,
+        AuthenticationsValidator,
+        usersService,
+        TokenManager,
+      },
+    },
+  ]);
 
-      // penanganan client error secara internal.
-      if (response instanceof ClientError){
-        const newResponse = h.response({
-          status: 'fail',
-          message: response.message
-        });
-        newResponse.code(response.statusCode);
+  // Menerapkan error pada onPreResponse
+  server.ext('onPreResponse', (request, h) => {
+    // mendapatkan konteks response dari request
+    const { response } = request;
 
-        return newResponse;
-      }
+    // penanganan client error secara internal.
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
 
-      return h.continue;
-    });
+      return newResponse;
+    }
 
+    return h.continue;
+  });
 
-    await server.start();
-    console.log(`Server berjalan pada ${server.info.uri}`);
-  }
-  catch (err) {
-
-  }
+  await server.start();
+  console.log(`Server berjalan pada ${server.info.uri}`);
 })();

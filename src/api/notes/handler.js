@@ -1,8 +1,8 @@
-class NotesHandler{
+class NotesHandler {
   #service;
   #validator;
 
-  constructor(service, validator){
+  constructor(service, validator) {
     this.#service = service;
     this.#validator = validator;
 
@@ -13,7 +13,7 @@ class NotesHandler{
     this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
   }
 
-  async postNoteHandler(request, h){
+  async postNoteHandler(request, h) {
     this.#validator.validateNotePayload(request.payload);
     const { title = 'untitled', tags, body } = request.payload;
 
@@ -21,9 +21,9 @@ class NotesHandler{
 
     const response = h.response({
       status: 'success',
-      message:'Catatan berhasil ditambahkan',
-      data : {
-        noteId
+      message: 'Catatan berhasil ditambahkan',
+      data: {
+        noteId,
       },
     });
     response.code(201);
@@ -31,18 +31,17 @@ class NotesHandler{
     return response;
   }
 
-  async getNotesHandler(){
+  async getNotesHandler() {
     const notes = await this.#service.getNotes();
     return {
-      status:'success',
-      data :
-        {
-          notes
-        }
+      status: 'success',
+      data: {
+        notes,
+      },
     };
   }
 
-  async getNoteByIdHandler(request, _h)  {
+  async getNoteByIdHandler(request, _h) {
     const { id } = request.params;
     const note = await this.#service.getNoteById(id);
 
@@ -55,8 +54,7 @@ class NotesHandler{
     };
   }
 
-
-  async putNoteByIdHandler(request, _h)  {
+  async putNoteByIdHandler(request, _h) {
     this.#validator.validateNotePayload(request.payload);
     const { id } = request.params;
 
@@ -64,17 +62,17 @@ class NotesHandler{
 
     return {
       status: 'success',
-      message: 'Catatan berhasil diperbarui'
+      message: 'Catatan berhasil diperbarui',
     };
   }
 
-  async deleteNoteByIdHandler(request, _h)  {
+  async deleteNoteByIdHandler(request, _h) {
     const { id } = request.params;
     await this.#service.deleteNoteById(id);
 
     return {
       status: 'success',
-      message: 'Catatan berhasil dihapus'
+      message: 'Catatan berhasil dihapus',
     };
   }
 }
