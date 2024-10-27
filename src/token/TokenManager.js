@@ -13,7 +13,6 @@ const TokenManager = {
 
       return payload;
     } catch (err) {
-      console.log(err);
       throw new InvariantError('Refresh token tidak valid');
     }
   },

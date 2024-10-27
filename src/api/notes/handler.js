@@ -48,7 +48,6 @@ class NotesHandler {
   async getNoteByIdHandler(request, _h) {
     const { id } = request.params;
     const { id: crendentialId } = request.auth.credentials;
-    console.log(crendentialId);
 
     await this.#service.verifyNoteOwner(id, crendentialId);
     const note = await this.#service.getNoteById(id);
