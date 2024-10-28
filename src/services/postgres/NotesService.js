@@ -87,6 +87,7 @@ class NotesService {
 
     return result.rows.map(mapDBToModel);
   }
+
   async deleteNoteById(id) {
     const query = {
       text: 'DELETE FROM notes WHERE id = $1 RETURNING *',

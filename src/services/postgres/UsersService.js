@@ -10,6 +10,7 @@ class UsersService {
     this._pool = new Pool();
   }
 
+  // Register
   async addUsers({ username, password, fullname }) {
     await this.verifyNewUsername(username);
 
@@ -29,6 +30,7 @@ class UsersService {
     return result.rows[0].id;
   }
 
+  // cek username
   async verifyNewUsername(username) {
     const query = {
       text: 'SELECT username FROM users WHERE username = $1',
@@ -57,6 +59,7 @@ class UsersService {
     return result.rows[0];
   }
 
+  // Login
   async verifyUsersCredential(username, password) {
     const query = {
       text: 'SELECT id, password FROM users WHERE username = $1',

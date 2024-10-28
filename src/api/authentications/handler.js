@@ -10,6 +10,7 @@ class AuthenticationsHandler {
     autoBind(this);
   }
 
+  // Login dan membuat Access Token, Refresh Token
   async postAuthenticationHandler(request, h) {
     const validatedPostAuthenticationPayload = this._validator.validatePostAuthenticationPayload(
       request.payload
@@ -17,11 +18,14 @@ class AuthenticationsHandler {
 
     const { username, password } = validatedPostAuthenticationPayload;
 
+    // Login, cek username dan password di db
     const id = await this._usersService.verifyUsersCredential(username, password);
 
+    // membuat access token dan refresh token
     const accessToken = this._tokenManager.generateAccessToken({ id });
     const refreshToken = this._tokenManager.generateRefreshToken({ id });
 
+    // menyimpan access token kedalam db
     await this._authenticationsService.addRefreshToken(refreshToken);
 
     const response = h.response({
@@ -47,7 +51,7 @@ class AuthenticationsHandler {
     await this._authenticationsService.verifyRefreshToken(refreshToken);
     const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
 
-    const accessToken = this._tokenManager.generateAccessToken({ id });
+    const accessToken = this._tokenManager.generateAccessToken({ id, exp: 15 });
 
     const response = h.response({
       status: 'success',
