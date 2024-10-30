@@ -51,7 +51,7 @@ class AuthenticationsHandler {
     await this._authenticationsService.verifyRefreshToken(refreshToken);
     const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
 
-    const accessToken = this._tokenManager.generateAccessToken({ id, exp: 15 });
+    const accessToken = this._tokenManager.generateAccessToken({ id });
 
     const response = h.response({
       status: 'success',
