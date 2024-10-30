@@ -4,6 +4,7 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const NotFoundError = require('../../error/NotFoundError');
 const AuthenticationsError = require('../../error/AuthenticationsError');
+const { user } = require('pg/lib/defaults');
 
 class UsersService {
   constructor() {
@@ -57,6 +58,17 @@ class UsersService {
     }
 
     return result.rows[0];
+  }
+
+  async getUsersByUsername(username) {
+    const query = {
+      text: 'SELECT id, username, fullname FROM users WHERE username LIKE $1',
+      values: [`%${username}%`],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows;
   }
 
   // Login

@@ -15,14 +15,20 @@ const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
 
-// Authentification Plugin
+// Authentications Plugin
 const authentications = require('./api/authentications');
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const AuthenticationsValidator = require('./validator/authentications');
 const TokenManager = require('./token/TokenManager');
 
+// Collaborations Plugin
+const collaborations = require('./api/collaborations');
+const CollaborationsValidator = require('./validator/collaborations');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+
 (async () => {
-  const notesService = new NotesService();
+  const collaborationsService = new CollaborationsService();
+  const notesService = new NotesService(collaborationsService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
 
@@ -83,13 +89,20 @@ const TokenManager = require('./token/TokenManager');
         TokenManager,
       },
     },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        notesService,
+        CollaborationsValidator,
+      },
+    },
   ]);
 
   // Menerapkan error pada onPreResponse
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request;
-    // console.log(response);
 
     // penanganan client error secara internal.
     if (response instanceof ClientError) {
