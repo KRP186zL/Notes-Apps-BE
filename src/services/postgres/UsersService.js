@@ -4,7 +4,6 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const NotFoundError = require('../../error/NotFoundError');
 const AuthenticationsError = require('../../error/AuthenticationsError');
-const { user } = require('pg/lib/defaults');
 
 class UsersService {
   constructor() {

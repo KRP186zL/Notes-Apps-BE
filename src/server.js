@@ -23,8 +23,13 @@ const TokenManager = require('./token/TokenManager');
 
 // Collaborations Plugin
 const collaborations = require('./api/collaborations');
-const CollaborationsValidator = require('./validator/collaborations');
 const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations');
+
+// Exports Plugin
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportsValidator = require('./validator/exports');
 
 (async () => {
   const collaborationsService = new CollaborationsService();
@@ -95,6 +100,13 @@ const CollaborationsService = require('./services/postgres/CollaborationsService
         collaborationsService,
         notesService,
         CollaborationsValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerService,
+        validator: ExportsValidator,
       },
     },
   ]);
