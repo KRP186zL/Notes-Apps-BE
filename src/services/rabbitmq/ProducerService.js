@@ -9,9 +9,7 @@ const ProducerService = {
       durable: true,
     });
 
-    const content = Buffer.from(message);
-
-    channel.sendToQueue(queue, content);
+    channel.sendToQueue(queue, Buffer.from(message));
 
     setTimeout(() => {
       connection.close();
