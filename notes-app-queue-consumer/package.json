@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./src/consumer.js",
     "lint": "eslint ./src",
-    "lint:fix":"eslint ./src --fix"
+    "lint:fix": "eslint ./src --fix"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "amqplib": "^0.10.4",
+    "auto-bind": "^4.0.0",
     "dotenv": "^16.4.5",
     "nodemailer": "^6.9.16",
     "pg": "^8.13.1"
