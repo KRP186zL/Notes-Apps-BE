@@ -3,3 +3,4 @@ Notes-API-Test.postman_collection.json
 Notes-API-Test.postman_environment.json
 .env
 .prod.env
+src/api/uploads/file
