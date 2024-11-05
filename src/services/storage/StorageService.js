@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 class StorageService{
   constructor(folder){
     this._folder = folder;
